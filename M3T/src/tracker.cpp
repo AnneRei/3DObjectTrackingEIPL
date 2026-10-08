@@ -253,8 +253,8 @@ bool Tracker::RunTrackerProcess(bool execute_detection, bool start_tracking,
     if (!ExecuteStartingStep(iteration)) return false;
     if (!ExecuteTrackingStep(iteration)) return false;
     tracking_mutex_.unlock();
-    if (!UpdatePublishers(iteration)) return false;
     if (!UpdateViewers(iteration)) return false;
+    if (!UpdatePublishers(iteration)) return false;
     if (quit_tracker_process_) return true;
     if (!synchronize_cameras_) WaitUntilCycleEnds(begin);
   }

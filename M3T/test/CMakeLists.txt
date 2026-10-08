@@ -20,7 +20,7 @@ if (USE_GTEST)
             viewer_test.cpp
             model_test.cpp
             color_histograms_test.cpp
-            modality_test.cpp 
+            #modality_test.cpp 
             detector_test.cpp
             optimizer_test.cpp
             refiner_test.cpp

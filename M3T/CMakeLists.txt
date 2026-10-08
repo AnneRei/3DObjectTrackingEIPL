@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.15)
 
 # A Multi-Body Multi-Modality Multi-Camera 3D Tracker (M3T)
 # =============================================================================
@@ -7,9 +7,9 @@ project(M3T)
 
 # Options
 # =============================================================================
-option(USE_AZURE_KINECT "Use Azure Kinect" ON)
-option(USE_REALSENSE "Use RealSense D435" ON)
-option(USE_GTEST "Use gtest" ON)
+set(USE_AZURE_KINECT false)
+set(USE_REALSENSE false)
+option(USE_GTEST true)
 
 
 # Libraries
@@ -26,14 +26,14 @@ endif ()
 
 # Used libraries
 find_package(OpenMP REQUIRED)
-find_package(Eigen3 3.3.2 REQUIRED)
+find_package(Eigen3 REQUIRED)
 find_package(GLEW REQUIRED)
 if (UNIX)
     set(OpenGL_GL_PREFERENCE LEGACY)
 endif ()
 find_package(OpenGL REQUIRED)
-find_package(glfw3 3.1.2 REQUIRED)
-find_package(OpenCV 4.3.0 REQUIRED COMPONENTS core imgproc highgui imgcodecs calib3d features2d xfeatures2d OPTIONAL_COMPONENTS cudafeatures2d)
+find_package(glfw3 REQUIRED)
+find_package(OpenCV 4.2.0 REQUIRED COMPONENTS core imgproc highgui imgcodecs calib3d)
 
 if (USE_AZURE_KINECT)
     find_package(k4a 1.3.0 REQUIRED)
@@ -132,7 +132,52 @@ endif ()
 
 # Directories
 # =============================================================================
-add_subdirectory(src)
-add_subdirectory(test)
-add_subdirectory(examples)
-add_subdirectory(doc)
+add_subdirectory(${CMAKE_SOURCE_DIR}/src)
+add_subdirectory(${CMAKE_SOURCE_DIR}/test)
+#add_subdirectory(examples)
+#add_subdirectory(doc)
+
+# Install
+# =============================================================================
+
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+
+message("Install dir ${CMAKE_INSTALL_LIBDIR} include dir ${CMAKE_INSTALL_INCLUDE_DIR}")
+
+install(TARGETS m3t
+        EXPORT m3tTargets
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDE_DIR}
+        PUBLIC_HEADER DESTINATION include/m3t
+        )
+
+install(
+    EXPORT m3tTargets
+    FILE m3tTargets.cmake
+    NAMESPACE m3t::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/m3t
+)
+
+export(
+    EXPORT m3tTargets
+    FILE "${CMAKE_CURRENT_BINARY_DIR}/m3tTargets.cmake"
+    NAMESPACE m3t::
+)
+
+
+configure_package_config_file(
+    m3tConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/m3tConfig.cmake
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/m3t
+)
+
+install(
+    FILES ${CMAKE_CURRENT_BINARY_DIR}/m3tConfig.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/m3t
+)
+
+
+

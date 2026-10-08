@@ -119,6 +119,10 @@ std::shared_ptr<RendererGeometry> NormalColorViewer::renderer_geometry_ptr()
 
 float NormalColorViewer::opacity() const { return opacity_; }
 
+const cv::Mat NormalColorViewer::silhouette_image() const {
+    return renderer_.normal_image();
+}
+
 bool NormalColorViewer::LoadMetaData() {
   // Open file storage from yaml
   cv::FileStorage fs;

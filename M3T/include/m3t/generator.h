@@ -34,7 +34,7 @@
 #include <m3t/soft_constraint.h>
 #include <m3t/static_detector.h>
 #include <m3t/subscriber.h>
-#include <m3t/texture_modality.h>
+
 #include <m3t/tracker.h>
 #include <m3t/viewer.h>
 
@@ -518,71 +518,7 @@ inline bool ConfigureDepthModalities(
       modality_ptrs);
 }
 
-inline bool ConfigureTextureModalities(
-    const std::filesystem::path& configfile_path,
-    const cv::FileStorage& file_storage,
-    const std::vector<std::shared_ptr<Body>>& body_ptrs,
-    const std::vector<std::shared_ptr<ColorCamera>>& color_camera_ptrs,
-    const std::vector<std::shared_ptr<FocusedSilhouetteRenderer>>&
-        focused_silhouette_renderer_ptrs,
-    const std::vector<std::shared_ptr<DepthCamera>>& depth_camera_ptrs,
-    const std::vector<std::shared_ptr<FocusedDepthRenderer>>&
-        focused_depth_renderer_ptrs,
-    std::vector<std::shared_ptr<Modality>>* modality_ptrs) {
-  std::string class_name{"TextureModality"};
-  return ConfigureObjects<TextureModality>(
-      file_storage, class_name,
-      {"name", "body", "color_camera", "focused_silhouette_renderer"},
-      [&](const auto& file_node, auto* texture_modality_ptr) {
-        // Get objects required for texture modality constructor
-        std::shared_ptr<Body> body_ptr;
-        std::shared_ptr<ColorCamera> color_camera_ptr;
-        std::shared_ptr<FocusedSilhouetteRenderer>
-            focused_silhouette_renderer_ptr;
-        if (!GetObject(file_node, "body", class_name, body_ptrs, &body_ptr) ||
-            !GetObject(file_node, "color_camera", class_name, color_camera_ptrs,
-                       &color_camera_ptr) ||
-            !GetObject(file_node, "focused_silhouette_renderer", class_name,
-                       focused_silhouette_renderer_ptrs,
-                       &focused_silhouette_renderer_ptr))
-          return false;
 
-        // Construct texture modality
-        if (MetafilePathEmpty(file_node))
-          *texture_modality_ptr = std::make_shared<TextureModality>(
-              Name(file_node), body_ptr, color_camera_ptr,
-              focused_silhouette_renderer_ptr);
-        else
-          *texture_modality_ptr = std::make_shared<TextureModality>(
-              Name(file_node), MetafilePath(file_node, configfile_path),
-              body_ptr, color_camera_ptr, focused_silhouette_renderer_ptr);
-
-        // Add additional objects
-        if (!file_node["measure_occlusions"].empty()) {
-          if (!AddObject(file_node["measure_occlusions"], "depth_camera",
-                         class_name, depth_camera_ptrs,
-                         [&](const auto& depth_camera_ptr) {
-                           (*texture_modality_ptr)
-                               ->MeasureOcclusions(depth_camera_ptr);
-                           return true;
-                         }))
-            return false;
-        }
-        if (!file_node["model_occlusions"].empty()) {
-          if (!AddObject(file_node["model_occlusions"],
-                         "focused_depth_renderer", class_name,
-                         focused_depth_renderer_ptrs,
-                         [&](const auto& focused_depth_renderer_ptr) {
-                           (*texture_modality_ptr)
-                               ->ModelOcclusions(focused_depth_renderer_ptr);
-                           return true;
-                         }))
-            return false;
-        }
-        return true;
-      },
-      modality_ptrs);
-}
 
 inline bool ConfigureLinks(
     const std::filesystem::path& configfile_path,
@@ -1044,11 +980,7 @@ inline bool GenerateConfiguredTracker(
       !ConfigureDepthModalities(
           configfile_path, fs, body_ptrs, depth_camera_ptrs, depth_model_ptrs,
           focused_depth_renderer_ptrs, focused_silhouette_renderer_ptrs,
-          &modality_ptrs) ||
-      !ConfigureTextureModalities(
-          configfile_path, fs, body_ptrs, color_camera_ptrs,
-          focused_silhouette_renderer_ptrs, depth_camera_ptrs,
-          focused_depth_renderer_ptrs, &modality_ptrs))
+          &modality_ptrs))
     return false;
 
   // Configure links

@@ -49,6 +49,7 @@ class NormalColorViewer : public ColorViewer {
   // Getters
   std::shared_ptr<RendererGeometry> renderer_geometry_ptr() const override;
   float opacity() const;
+  const cv::Mat silhouette_image() const;
 
  private:
   // Helper method

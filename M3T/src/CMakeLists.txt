@@ -22,7 +22,7 @@ set(SOURCES
         modality.cpp
         region_modality.cpp
         depth_modality.cpp
-        texture_modality.cpp
+        #texture_modality.cpp
         link.cpp
         constraint.cpp
         soft_constraint.cpp
@@ -55,7 +55,7 @@ set(HEADERS
         ../include/m3t/modality.h
         ../include/m3t/region_modality.h
         ../include/m3t/depth_modality.h
-        ../include/m3t/texture_modality.h
+        #../include/m3t/texture_modality.h
         ../include/m3t/link.h
         ../include/m3t/constraint.h
         ../include/m3t/soft_constraint.h
@@ -96,7 +96,28 @@ endif ()
 # Define target
 # =============================================================================
 add_library(m3t STATIC ${SOURCES} ${HEADERS})
-target_link_libraries(m3t PUBLIC ${LIBRARIES})
+target_link_libraries(m3t PUBLIC 
+	${LIBRARIES}
+
+)
+#target_include_directories(m3t SYSTEM PUBLIC 
+#	$(m3t_INCLUDE_DIRS)
+#	)
+#target_link_libraries(m3t PUBLIC
+#        ${m3t_LIBRARIES}
+#)
+#target_include_directories(m3t PUBLIC
+#        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
+#        $<INSTALL_INTERFACE:include>)
+#include_directories(SYSTEM ../third_party/)
+#target_include_directories(m3t PUBLIC
+#        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../third_party>
+#        $<INSTALL_INTERFACE:include>)
+set_target_properties(m3t PROPERTIES PUBLIC_HEADER "${HEADERS}" POSITION_INDEPENDENT_CODE TRUE)
+target_compile_options(m3t PRIVATE -Wunused-result)
+target_compile_options(m3t PRIVATE -Wno-unused-result)
+
+
 target_include_directories(m3t PUBLIC  
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
         $<INSTALL_INTERFACE:include>)
@@ -106,14 +127,4 @@ target_include_directories(m3t PUBLIC
 set_target_properties(m3t PROPERTIES PUBLIC_HEADER "${HEADERS}")
 
 
-# Install
-# =============================================================================
-install(TARGETS m3t
-        EXPORT m3t_target
-        LIBRARY DESTINATION lib
-        PUBLIC_HEADER DESTINATION include/m3t)
-install(DIRECTORY ../third_party/
-        DESTINATION include)
-install(EXPORT m3t_target 
-        FILE M3TConfig.cmake
-        DESTINATION lib/cmake/M3T)
+
